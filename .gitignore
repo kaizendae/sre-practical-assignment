@@ -1,0 +1,7 @@
+# Environment variables
+.env
+services/auth/.env
+services/api/.env
+
+# Node.js
+services/api/node_modules
