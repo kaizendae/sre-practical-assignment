@@ -216,4 +216,4 @@ def readyz_check():
 # --- Run the Flask App ---
 if __name__ == '__main__':
     # Flask will run on http://127.0.0.1:5000/ by default
-    app.run(debug=os.getenv("FLASK_DEBUG", "true").lower() == "true", port=8080) # debug=True allows for automatic reloading on code changes
+    app.run(debug=os.getenv("FLASK_DEBUG", "true"), port=8080) # debug=True allows for automatic reloading on code changes
