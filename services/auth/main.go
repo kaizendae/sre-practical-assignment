@@ -47,6 +47,11 @@ func HelloServer(w http.ResponseWriter, r *http.Request) {
 }
 
 func healthzHandler(w http.ResponseWriter, r *http.Request) {
+	err := db.Ping()
+	if err != nil {
+		http.Error(w, "db not ready", http.StatusInternalServerError)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte("OK"))
 }
