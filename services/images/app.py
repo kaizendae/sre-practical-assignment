@@ -1,3 +1,4 @@
+from logging import debug
 import os
 import json
 from flask import Flask, request, render_template_string, redirect, url_for
@@ -216,4 +217,5 @@ def readyz_check():
 # --- Run the Flask App ---
 if __name__ == '__main__':
     # Flask will run on http://127.0.0.1:5000/ by default
-    app.run(debug=os.getenv("FLASK_DEBUG", "true"), port=8080) # debug=True allows for automatic reloading on code changes
+    flask_debug = os.getenv("FLASK_DEBUG", "false").lower() in ["1", "true", "yes"]
+    app.run(host="0.0.0.0", debug=flask_debug, port=8080) # debug mode controlled by FLASK_DEBUG env var
