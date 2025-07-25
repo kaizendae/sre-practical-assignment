@@ -49,6 +49,9 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
     - Port 3000
     - Exposes `/` endpoint
     - Exposes `/healthz` and `/readyz` endpoints which checks the db connection.
+
+    https://github.com/user-attachments/assets/57ca02b9-1124-4736-ae64-7bc60612207f
+
   - `auth` (Go) at `services/auth`
     - Port 5000
     - Exposes `/` endpoint returning "Hello World"
@@ -59,8 +62,13 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
     - Exposes `/images/upload` endpoint
     - Exposes `/healthz` and `/readyz` endpoints which checks the GCS connection
     - Uses Google Cloud Storage for image storage
+   
+    https://github.com/user-attachments/assets/b1d8ba48-217f-4e58-b849-1c00e33cdae0
       
-  https://github.com/user-attachments/assets/b1d8ba48-217f-4e58-b849-1c00e33cdae0
+
+
+
+  
 
 
 
