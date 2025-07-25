@@ -97,6 +97,12 @@ HTML_TEMPLATE = """
     <div class="container bg-white p-10 rounded-xl shadow-lg">
         <h1 class="text-3xl font-bold text-gray-800 mb-6">Upload to GCS Bucket: {{ BUCKET_NAME }}</h1>
 
+        <!-- Endpoint Links -->
+        <div class="mb-6">
+            <a href="/healthz" class="text-blue-600 hover:underline mr-4">Health Check</a>
+            <a href="/readyz" class="text-blue-600 hover:underline">Readiness Check</a>
+        </div>
+
         <!-- File Upload Form -->
         <form action="{{ url_for('upload_file') }}" method="post" enctype="multipart/form-data" class="space-y-4">
             <label for="file" class="block text-left text-gray-700 font-medium mb-2">Choose File:</label>
@@ -106,9 +112,9 @@ HTML_TEMPLATE = """
                 file:text-sm file:font-semibold
                 file:bg-blue-50 file:text-blue-700
                 hover:file:bg-blue-100
-                cursor-pointer" required>
-            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg
-                transition duration-300 ease-in-out transform hover:scale-105 shadow-md">
+                cursor-pointer" required onchange="document.getElementById('upload-btn').disabled = !this.files.length">
+            <button id="upload-btn" type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg
+                transition duration-300 ease-in-out transform hover:scale-105 shadow-md disabled:bg-gray-400 disabled:cursor-not-allowed" style="min-width: 120px;" disabled>
                 Upload File
             </button>
         </form>
@@ -195,7 +201,7 @@ def health_check():
         # We only need to iterate over the generator once to confirm access.
         # Using max_results=1 to make it efficient for a health check.
         list(storage_client.list_blobs(BUCKET_NAME, max_results=1))
-        return "Bucket access OK", 200
+        return "application is up and healthy", 200
     except Exception as e:
         # If any exception occurs, bucket access failed.
         return f"Bucket access FAILED: {e}", 500
@@ -209,7 +215,7 @@ def readyz_check():
     try:
         # Attempt to list blobs in the bucket to verify readiness.
         list(storage_client.list_blobs(BUCKET_NAME, max_results=1))
-        return "Application READY", 200
+        return "Application READY, Bucket access ok", 200
     except Exception as e:
         return f"Application NOT READY: {e}", 503 # Use 503 Service Unavailable for readiness probe failure
 
