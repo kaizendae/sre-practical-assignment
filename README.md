@@ -59,6 +59,10 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
     - Exposes `/images/upload` endpoint
     - Exposes `/healthz` and `/readyz` endpoints which checks the GCS connection
     - Uses Google Cloud Storage for image storage
+      
+  https://github.com/user-attachments/assets/b1d8ba48-217f-4e58-b849-1c00e33cdae0
+
+
 
 ---
 
