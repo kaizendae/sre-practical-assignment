@@ -23,6 +23,7 @@ const metricsMiddleware = promBundle({
  customLabels: {project_name: 'hello_world', project_type: 'test_metrics_labels'},
  promClient: {
  collectDefaultMetrics: {
+  prefix: 'my_app_',
  }
  }
 });
