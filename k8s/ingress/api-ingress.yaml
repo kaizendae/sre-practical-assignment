@@ -4,14 +4,14 @@ metadata:
   name: api-ingress
   namespace: api
   annotations:
-    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   tls:
     - hosts:
-        - api.kaizendae.com
-      secretName: wc-kaizen-tls
+        - api.test
+      secretName: test-tls
   rules:
-  - host: api.kaizendae.com
+  - host: api.test
     http:
       paths:
       - path: /
