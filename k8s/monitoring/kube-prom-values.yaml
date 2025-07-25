@@ -20,6 +20,27 @@ grafana:
 prometheus:
   ingress:
     enabled: false
+  prometheusSpec:
+    scrapeInterval: 5s
+    evaluationInterval: 5s
+    ruleNamespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: Exists
+    ruleSelectorNilUsesHelmValues: false
+    serviceMonitorSelectorNilUsesHelmValues: false
+    serviceMonitorSelector: {}
+    serviceMonitorNamespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: Exists
+    podMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelector: {}
+    podMonitorNamespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: Exists
+    retention: "90d"
 
 alertmanager:
   ingress:
