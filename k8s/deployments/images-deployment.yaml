@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: images
-        image: random9deploy/images-service:8
+        image: random9deploy/images-service:12
         ports:
         - containerPort: 8080
         env:

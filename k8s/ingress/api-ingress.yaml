@@ -6,10 +6,10 @@ metadata:
   annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  tls:
-    - hosts:
-        - api.test
-      secretName: test-tls
+  # tls:
+  #   - hosts:
+  #       - api.test
+  #     secretName: test-tls
   rules:
   - host: api.test
     http:

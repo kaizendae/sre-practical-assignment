@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: api-service
   namespace: api
+  labels:
+    app: api
 spec:
   selector:
     app: api
@@ -10,3 +12,4 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 3000
+      name: http

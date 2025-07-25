@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: auth-service
   namespace: auth
+  labels:
+    app: auth
 spec:
   selector:
     app: auth
@@ -10,3 +12,4 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 8080
+      name: http
