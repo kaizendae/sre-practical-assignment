@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-api-to-auth
+  namespace: auth
+spec:
+  podSelector:
+    matchLabels:
+      app: auth
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: api
+          podSelector:
+            matchLabels:
+              app: api
+  policyTypes:
+    - Ingress
