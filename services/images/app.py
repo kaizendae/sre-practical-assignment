@@ -4,6 +4,7 @@ import json
 from flask import Flask, request, render_template_string, redirect, url_for
 from google.cloud import storage
 from google.oauth2 import service_account
+from prometheus_flask_exporter import PrometheusMetrics
 
 # --- Configuration ---
 # Your Google Cloud Storage bucket name
@@ -13,6 +14,8 @@ CREDENTIALS_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "./credentials.js
 
 # --- Flask App Initialization ---
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
+metrics.info('images-microservice', 'app for demo purposes', version='0.0.1')
 
 # --- Google Cloud Storage Client Initialization ---
 # Ensure the credentials file exists
