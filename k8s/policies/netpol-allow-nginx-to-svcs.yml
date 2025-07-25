@@ -1,0 +1,59 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nginx-to-api
+  namespace: api
+spec:
+  podSelector:
+    matchLabels:
+      app: api
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: nginx-ingress
+  policyTypes:
+  - Ingress
+--- 
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nginx-to-auth
+  namespace: auth
+spec:
+  podSelector:
+    matchLabels:
+      app: auth
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: nginx-ingress
+  policyTypes:
+  - Ingress
+--- 
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-nginx-to-images
+  namespace: images
+spec:
+  podSelector:
+    matchLabels:
+      app: images
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: default
+      podSelector:
+        matchLabels:
+          app.kubernetes.io/name: nginx-ingress
+  policyTypes:
+  - Ingress
