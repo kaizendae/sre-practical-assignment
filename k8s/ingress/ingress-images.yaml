@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: images-ingress
+  namespace: images
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+spec:
+  tls:
+    - hosts:
+        - images.kaizendae.com
+      secretName: wc-kaizen-tls
+  rules:
+  - host: images.kaizendae.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: images-service
+            port:
+              number: 80

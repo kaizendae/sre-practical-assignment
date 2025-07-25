@@ -17,30 +17,41 @@ spec:
     spec:
       containers:
       - name: images
-        image: random9deploy/images-service:4
+        image: random9deploy/images-service:8
         ports:
-        - containerPort: 3000
+        - containerPort: 8080
         env:
-        - name: DB_HOST
-          value: "postgres-service.db.svc.cluster.local"
-        - name: DB_PORT
-          value: "5432"
-        - name: DB_USER
-          valueFrom:
-            secretKeyRef:
-              name: postgres-creds
-              key: POSTGRES_USER
-        - name: DB_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: postgres-creds
-              key: POSTGRES_PASSWORD
-        - name: DB_NAME
-          value: "api"
+        - name: BUCKET_NAME
+          value: "sre-images-bucket"
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: /etc/gcs/credentials.json
+        - name: FLASK_DEBUG
+          value: "false"
+        volumeMounts:
+        - name: gcs-creds
+          mountPath: /etc/gcs
+          readOnly: true
         resources:
           limits:
             memory: "256Mi"
             cpu: "500m"
           requests:
-            memory: "128Mi"
-            cpu: "250m"
+            memory: "256Mi"
+            cpu: "250m" 
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 3
+      volumes:
+      - name: gcs-creds
+        secret:
+          secretName: gcs-creds
+      

@@ -17,9 +17,38 @@ spec:
     spec:
       containers:
       - name: api
-        image: random9deploy/api-service:4
+        image: random9deploy/api-service:5
         ports:
         - containerPort: 3000
+        env:
+        - name: DB_HOST
+          value: "postgres-service.db.svc.cluster.local"
+        - name: DB_PORT
+          value: "5432"
+        - name: DB_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-creds
+              key: POSTGRES_USER
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-creds
+              key: POSTGRES_PASSWORD
+        - name: DB_NAME
+          value: "api"
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 5
         resources:
           limits:
             memory: "256Mi"
