@@ -20,6 +20,7 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
       - [2. 🐳 Dockerization and Image Hosting](#2--dockerization-and-image-hosting)
         - [💡 Improvement Suggestions for Build and CI](#-improvement-suggestions-for-build-and-ci)
       - [3. 🚢 Deployment](#3--deployment)
+        - [💡 Improvement Suggestions for Deployment](#-improvement-suggestions-for-deployment)
       - [4. 🔐 Secrets \& Configuration](#4--secrets--configuration)
         - [💡 Improvement Suggestions for Secrets Management](#-improvement-suggestions-for-secrets-management)
       - [5. 🌐 Ingress \& TLS](#5--ingress--tls)
@@ -29,7 +30,7 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
         - [💡 Improvement Suggestions for Autoscaling and Self-healing](#-improvement-suggestions-for-autoscaling-and-self-healing)
       - [9. 🔭 Observability](#9--observability)
         - [suggestions for observability](#suggestions-for-observability)
-      - [10. 💥 Failure Simulation](#10--failure-simulation)
+      - [10. 💥 Failure Simulation, What’s Missing \& What’s Next](#10--failure-simulation-whats-missing--whats-next)
 
 ---
 
@@ -69,7 +70,7 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
 #### 2. 🐳 Dockerization and Image Hosting
 
 - Each service includes a `Dockerfile` with its runtime requirements.
-- Images are built via CI/CD and pushed to public Docker hub repositories: .github/workflows/ci.ymal
+- Images are built via CI/CD and pushed to public Docker hub repositories: .github/workflows/ci.yaml
 
   ##### 💡 Improvement Suggestions for Build and CI
 
@@ -141,6 +142,12 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
     kubectl apply -f 'k8s/secrets/wc-cert.yaml' -n monitoring
     ```
 
+##### 💡 Improvement Suggestions for Deployment
+
+- Set securityContext and runAsNonRoot: true
+- Use readOnlyRootFilesystem: true where applicable
+- Drop Linux capabilities
+  
 #### 4. 🔐 Secrets & Configuration
 
   Used kubectl create secrets to store database credentials in each namespace, gcs access credentials.
@@ -239,7 +246,7 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
 
 #### 9. 🔭 Observability
 
-- Integrated prometheurs exporter in each service to expose metrics endpoints.
+- Integrated prometheus exporter in each service to expose metrics endpoints.
 - added serviceMonitor resources to scrape the metrics endpoints of each service by prometheus.
   
   ```sh
@@ -252,21 +259,18 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
   ![Flask API Dashboard](diagrams/flask-dashboard.png)
 - The adapted dashboards are available at `k8s/monitoring/dashboards/`.
 
-
 ##### suggestions for observability
 
-- Instrument the services with custom metrics.
+- Instrument the services with custom metrics. (e.g., number of uploaded images, failed authentications, DB query duration) are currently instrumented.
 - Instrument the services [OpenTelemetry](https://opentelemetry.io/) for distributed tracing across services.
 - Implement structured logging in each service to capture key events and errors.
 - Use [Loki](https://grafana.com/oss/loki/) for log aggregation and querying.
 - Use grafana drill down feature to visualize logs and metrics together for better debugging and performance analysis.
+- Add SMTP credentials to kube-prometheus-stack chart values.
 
-#### 10. 💥 Failure Simulation
+#### 10. 💥 Failure Simulation, What’s Missing & What’s Next
 
-- Implemented failure injection using `kubectl delete pod` to simulate outages.
-- Utilized Prometheus and Grafana for comprehensive observability, monitoring service health and performance during failures.
-- Configured alerts for critical metrics to ensure prompt notification of issues.
-- A Python script `scripts/generate_traffic.py` is provided to simulate random traffic to the `api.test`, `auth.test`, and `images.test` endpoints.
+- To Be Added: Simulate failures in the services to test resilience and recovery.
 
 To run the traffic generation script:
 
