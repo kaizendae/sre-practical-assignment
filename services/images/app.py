@@ -15,7 +15,7 @@ CREDENTIALS_FILE = os.getenv("GOOGLE_APPLICATION_CREDENTIALS", "./credentials.js
 # --- Flask App Initialization ---
 app = Flask(__name__)
 metrics = PrometheusMetrics(app)
-metrics.info('images-microservice', 'app for demo purposes', version='0.0.1')
+metrics.info('imagesmicroservice', 'app for demo purposes', version='0.0.1')
 
 # --- Google Cloud Storage Client Initialization ---
 # Ensure the credentials file exists
