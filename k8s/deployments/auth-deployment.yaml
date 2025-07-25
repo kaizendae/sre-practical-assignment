@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: auth
-        image: random9deploy/auth-service:5
+        image: random9deploy/auth-service:12
         ports:
         - containerPort: 8080
         env:

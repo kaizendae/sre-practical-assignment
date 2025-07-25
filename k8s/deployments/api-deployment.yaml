@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: api
-        image: random9deploy/api-service:5
+        image: random9deploy/api-service:12
         ports:
         - containerPort: 3000
         env:
