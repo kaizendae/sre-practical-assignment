@@ -74,7 +74,7 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
 
   ##### 💡 Improvement Suggestions for Build and CI
 
-  - Implement multi-stage builds to optimize image size.
+  - Implement multi-stage builds to optimize image size, and reduce attack surface.
   - Use private Docker registry to prevent unsecured access then add image pull secrets to the deployments.
   - Use container scanning tools (e.g., Trivy) to check for vulnerabilities in images in CI/CD pipeline.
   - Use bandit, gosec, eslint-plugin-security to check for security issues is services' code in the CI.
