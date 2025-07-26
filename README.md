@@ -133,7 +133,7 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
     kubectl apply -f k8s/secrets/gcs-creds.yaml
     ```
 
-8. [deploy the TLS secret for the ingress](#5--ingress--tls)
+8. deploy the TLS secret for the [ingress](#5--ingress--tls)
 
     ```sh
     kubectl apply -f 'k8s/secrets/wc-cert.yaml' -n api
@@ -147,6 +147,7 @@ This project demonstrates the deployment of three microservices (`api`, `auth`, 
 - Set securityContext and runAsNonRoot: true
 - Use readOnlyRootFilesystem: true where applicable
 - Drop Linux capabilities
+- Setup a gitops workflow using ArgoCD or FluxCD to manage deployments and configurations.
   
 #### 4. 🔐 Secrets & Configuration
 
@@ -181,8 +182,7 @@ echo "127.0.0.1 api.test auth.test images.test monitoring.test" | sudo tee -a /e
 
 The certificate and TLS secrets are included in the repo but to regenerate them:
 
-```
-
+```sh
 cd certs/test
 openssl req -x509 -nodes -days 365 \
   -key test.key \
@@ -205,7 +205,7 @@ kubectl apply -f k8s/policies/netpol-allow-nginx-to-svcs.yaml
 kubectl apply -f k8s/policies/netpol-allow-svcs-db.yaml
 ```
 
-- The default deny policy blocks all traffic by default.
+- The default deny policy blocks all ingress traffic by default.
 - The `netpol-allow-api-auth.yaml` allows traffic from the `api` service to the `auth` service.
 - The `netpol-allow-nginx-to-svcs.yaml` allows traffic from the NGINX Ingress controller to the `api`, `auth`, and `images` services.
 - The `netpol-allow-svcs-db.yaml` allows traffic from the `api` and `auth` services to the database service.
@@ -223,7 +223,20 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
   --namespace monitoring \
   --create-namespace \
   --values k8s/monitoring/kube-prom-values.yaml
+
+# To Upgrade the monitoring stack:
+helm upgrade kube-prometheus-stack prometheus-community/kube-prometheus-stack \
+  --version 75.13.0 \
+  --namespace monitoring \
+  --values k8s/monitoring/kube-prom-values.yaml
+
 ```
+
+Access Grafana dashboard: <https://monitoring.test>
+Default credentials:
+
+- Username: `admin`
+- Password: `prom-operator`
 
 #### 8. 📈 Autoscaling & Ensuring Availability
 
@@ -257,7 +270,7 @@ helm install kube-prometheus-stack prometheus-community/kube-prometheus-stack \
   ![Node JS API Dashboard](diagrams/nodejs-dashboard.png)
 - Dashboard for images service
   ![Flask API Dashboard](diagrams/flask-dashboard.png)
-- The adapted dashboards are available at `k8s/monitoring/dashboards/`.
+- The adapted dashboards are available at `k8s/monitoring/dashboards/` can you imported from Grafana UI.
 
 ##### suggestions for observability
 
@@ -277,4 +290,9 @@ To run the traffic generation script:
 ```sh
 pip install requests
 python scripts/generate_traffic.py
+```
+
+To deploy the entire infrastructure:
+```sh
+./scripts/deploy_infra.sh
 ```
