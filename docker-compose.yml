@@ -1,0 +1,166 @@
+services:
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: api
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build:
+      context: ./services/api
+    ports:
+      - "3000:3000"
+      - "9464:9464"  # Prometheus metrics endpoint
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=api
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+    depends_on:
+      - postgres
+    volumes:
+      - ./services/api:/usr/src/app
+    command: [ "nodemon", "--exec", "node", "--require", "./instrumentation.js", "index.js" ]
+    develop:
+      watch:
+        - action: sync
+          path: ./services/api
+          target: /usr/src/app
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: package.json
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  auth:
+    build:
+      context: ./services/auth
+    ports:
+      - "8080:8080"
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=postgres
+      - DB_PASSWORD=password
+      - DB_NAME=auth
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./services/auth:/go/src/app
+    restart: unless-stopped
+
+  images:
+    build:
+      context: ./services/images
+    ports:
+      - "8081:8080"
+    environment:
+      - BUCKET_NAME=sre-images-bucket
+      - GOOGLE_APPLICATION_CREDENTIALS=./credentials.json
+      - FLASK_DEBUG=TRUE
+    volumes:
+      - ./services/images:/app
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./local-observability/prometheus/prometheus.yaml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./local-observability/grafana/provisioning:/etc/grafana/provisioning
+      - ./local-observability/grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3001:3000"
+    depends_on:
+      - prometheus
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    restart: unless-stopped
+
+  tempo:
+    image: grafana/tempo:2.4.1
+    container_name: tempo
+    command: ["-config.file=/etc/tempo/tempo.yaml"]
+    volumes:
+      - ./local-observability/tempo/:/etc/tempo/
+    ports:
+      - "3200:3200"      # Tempo HTTP API
+      - "4317:4317"      # OTLP gRPC
+      - "4318:4318"      # OTLP HTTP
+    restart: unless-stopped
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.97.0
+    container_name: otel-collector
+    volumes:
+      - ./local-observability/otel-collector/:/etc/otelcol/
+    command: ["--config=/etc/otelcol/otel-collector-config.yaml"]
+    ports:
+      - "4317:4317"      # OTLP gRPC receiver
+      - "4318:4318"      # OTLP HTTP receiver
+      - "8889:8889"      # Prometheus metrics exporter
+    depends_on:
+      - prometheus
+      - tempo
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4318"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  loki:
+    image: grafana/loki:2.9.4
+    command: -config.file=/etc/loki/config.yaml
+    volumes:
+      - ./local-observability/loki/config.yaml:/etc/loki/config.yaml
+      - loki_data:/tmp
+    ports:
+      - "3100:3100"
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:2.9.4
+    volumes:
+      - /var/log:/var/log
+      - /etc/machine-id:/etc/machine-id
+      - ./local-observability/promtail/config.yaml:/etc/promtail/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yaml
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  grafana_data:
+  loki_data:

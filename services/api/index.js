@@ -31,6 +31,10 @@ const metricsMiddleware = promBundle({
 // add the prometheus middleware to all routes
 app.use(metricsMiddleware)
 
+function getRandomNumber(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
 app.get('/', (req, res) => {
   res.send(`
     <h1>Node.js API Service</h1>
@@ -40,11 +44,10 @@ app.get('/', (req, res) => {
       <li><b>GET <a href="/healthz">/healthz</a></b> - Liveness probe, returns 200 OK if service is up</li>
       <li><b>GET <a href="/readyz">/readyz</a></b> - Readiness probe, returns 200 OK if DB is ready, 500 otherwise</li>
       <li><b>GET <a href="/metrics">/metrics</a></b> - Prometheus metrics endpoint</li>
+      <li><b>GET <a href="/rolldice">/rolldice</a></b> - Roll a dice, returns a random number between 1 and 6</li>
     </ul>
   `);
 });
-
-
 
 app.get('/healthz', (req, res) => {
   res.status(200).send('OK');
@@ -58,6 +61,10 @@ app.get('/readyz', async (req, res) => {
   } catch (err) {
     res.status(500).send('db not ready');
   }
+});
+
+app.get('/rolldice', (req, res) => {
+  res.send(getRandomNumber(1, 6).toString());
 });
 
 app.listen(port, () => {
