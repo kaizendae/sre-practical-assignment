@@ -2,9 +2,25 @@ require('dotenv').config();
 const express = require('express');
 const promBundle = require("express-prom-bundle");
 const { Pool } = require('pg');
+const pino = require('pino');
+const pinoHttp = require('pino-http');
+
+const logger = pino({
+  level: 'info',
+  timestamp: pino.stdTimeFunctions.isoTime,
+  formatters: {
+    level: (label) => {
+      return { level: label };
+    },
+  },
+});
+
+const httpLogger = pinoHttp({ logger });
+
 
 const app = express();
 const port = 3000;
+app.use(httpLogger);
 
 const pool = new Pool({
   host: process.env.DB_HOST,
@@ -68,5 +84,5 @@ app.get('/rolldice', (req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`API service listening at http://localhost:${port}`);
+  logger.info(`API service listening at http://localhost:${port}`);
 });
