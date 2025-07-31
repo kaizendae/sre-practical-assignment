@@ -5,3 +5,5 @@ services/api/.env
 
 # Node.js
 services/api/node_modules
+
+tempo-data
