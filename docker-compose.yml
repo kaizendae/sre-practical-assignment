@@ -28,12 +28,16 @@ services:
       - DB_USER=postgres
       - DB_PASSWORD=password
       - DB_NAME=api
-      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318/v1/traces
     depends_on:
       - postgres
     volumes:
       - ./services/api:/usr/src/app
     command: [ "nodemon", "--exec", "node", "--require", "./instrumentation.js", "index.js" ]
+    logging:
+      driver: "json-file"
+      options:
+        tag: "{{.Name}}"
     develop:
       watch:
         - action: sync
@@ -45,10 +49,12 @@ services:
           path: package.json
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3000/healthz"]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+    - observability
 
   auth:
     build:
@@ -105,19 +111,24 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=grafana-pyroscope-app,grafana-lokiexplore-app,grafana-metricsdrilldown-app
     restart: unless-stopped
-
+    networks:
+      - observability
   tempo:
     image: grafana/tempo:2.4.1
     container_name: tempo
     command: ["-config.file=/etc/tempo/tempo.yaml"]
     volumes:
       - ./local-observability/tempo/:/etc/tempo/
+      - ./tempo-data:/var/tempo
     ports:
       - "3200:3200"      # Tempo HTTP API
-      - "4317:4317"      # OTLP gRPC
-      - "4318:4318"      # OTLP HTTP
+      - "4319:4317"      # OTLP gRPC
+      - "4320:4318"      # OTLP HTTP
     restart: unless-stopped
+    networks:
+      - observability
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.97.0
@@ -138,6 +149,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - observability
 
   loki:
     image: grafana/loki:2.9.4
@@ -148,9 +161,12 @@ services:
     ports:
       - "3100:3100"
     restart: unless-stopped
+    networks:
+      - observability
 
   promtail:
     image: grafana/promtail:2.9.4
+    user: root
     volumes:
       - /var/log:/var/log
       - /etc/machine-id:/etc/machine-id
@@ -159,8 +175,17 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     command: -config.file=/etc/promtail/config.yaml
     restart: unless-stopped
+    depends_on:
+      - loki
+    ports:
+      - "9080:9080"  # Promtail HTTP server
+    networks:
+      - observability
 
 volumes:
   postgres_data:
   grafana_data:
   loki_data:
+
+networks:
+  observability:
