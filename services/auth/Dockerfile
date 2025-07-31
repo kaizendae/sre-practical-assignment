@@ -1,6 +1,6 @@
 FROM golang:1.24.5
+RUN go install github.com/air-verse/air@latest
 WORKDIR /app
 COPY . .
-RUN go build -o main .
 EXPOSE 8080
-CMD [ "/app/main" ]
+ENTRYPOINT [ "air" ]
