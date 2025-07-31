@@ -95,6 +95,8 @@ services:
     ports:
       - "9090:9090"
     restart: unless-stopped
+    networks:
+      - observability
 
   grafana:
     image: grafana/grafana
@@ -124,8 +126,8 @@ services:
       - ./tempo-data:/var/tempo
     ports:
       - "3200:3200"      # Tempo HTTP API
-      - "4319:4317"      # OTLP gRPC
-      - "4320:4318"      # OTLP HTTP
+      - "4319:4319"      # OTLP gRPC
+      - "4320:4320"      # OTLP HTTP
     restart: unless-stopped
     networks:
       - observability
@@ -189,3 +191,4 @@ volumes:
 
 networks:
   observability:
+    driver: bridge
