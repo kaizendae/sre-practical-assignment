@@ -73,14 +73,18 @@ app.get('/readyz', async (req, res) => {
   try {
     const client = await pool.connect();
     client.release();
+    logger.info('Database connection successful');
     res.status(200).send('OK');
   } catch (err) {
+    logger.error({ error: err }, 'Database connection failed');
     res.status(500).send('db not ready');
   }
 });
 
 app.get('/rolldice', (req, res) => {
-  res.send(getRandomNumber(1, 6).toString());
+  const result = getRandomNumber(1, 6);
+  logger.info({ result }, 'Dice rolled');
+  res.send(result.toString());
 });
 
 app.listen(port, () => {
