@@ -1,6 +1,5 @@
 /*instrumentation.js*/
 // Require dependencies
-const { diag, DiagConsoleLogger, DiagLogLevel } = require('@opentelemetry/api');
 const { NodeSDK } = require('@opentelemetry/sdk-node');
 const { OTLPTraceExporter } = require('@opentelemetry/exporter-trace-otlp-http');
 const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
@@ -11,8 +10,6 @@ const {
 const {
   getNodeAutoInstrumentations,
 } = require('@opentelemetry/auto-instrumentations-node');
-
-diag.setLogger(new DiagConsoleLogger(), DiagLogLevel.DEBUG);
 
 const sdk = new NodeSDK({
   resource: new Resource({
